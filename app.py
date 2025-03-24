@@ -1,13 +1,13 @@
 # app.py
 from flask import Flask
 import os
-from utils import create_sales_graph, create_html_content
+from utils import create_basket_cost_graph, create_html_content
 
 app = Flask(__name__)
 
 @app.route('/')
 def hello():
-    img_data = create_sales_graph()
+    img_data = create_basket_cost_graph()
     html = create_html_content(img_data)
     return html
 
