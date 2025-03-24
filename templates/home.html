@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Cost of Living - Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Cost of Living Analysis</h1>
+    <div class="description">
+        <p>Este gráfico muestra los 10 países donde la "Canasta Básica Mensual" (Monthly Basket of Goods) 
+        tiene el menor costo unitario en USD. Estos datos ayudan a identificar los países con menor costo de vida.</p>
+    </div>
+    <img src="data:image/png;base64,{{ img_data }}" alt="Cheapest Countries Chart">
+{% endblock %}

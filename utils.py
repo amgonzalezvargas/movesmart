@@ -62,7 +62,7 @@ def create_basket_cost_graph():
         height = bar.get_height()
         ax.annotate(f'${height:.2f}',
                    xy=(bar.get_x() + bar.get_width() / 2, height),
-                   xytext=(0, 3),  # 3 puntos de offset vertical
+                   xytext=(0, 3),
                    textcoords="offset points",
                    ha='center', va='bottom')
     
