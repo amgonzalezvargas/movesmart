@@ -76,6 +76,43 @@ def create_basket_cost_graph():
     img_data = base64.b64encode(buf.getvalue()).decode('utf-8')
     return img_data
 
+
+def get_countries():
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        cursor = connection.cursor()
+        query = "SELECT country_name FROM country ORDER BY country_name"
+        cursor.execute(query)
+        countries = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        connection.close()
+        return countries
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return []
+
+def get_country_items(country_name):
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        cursor = connection.cursor()
+        query = """
+        SELECT i.item_name, i.unit_cost_USD
+        FROM item i
+        JOIN country c ON i.country_id = c.country_id
+        WHERE c.country_name = %s
+        ORDER BY i.item_name
+        """
+        cursor.execute(query, (country_name,))
+        items = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        return items
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return []
+
+
+
 def create_html_content(img_data):
     return f'''
     <!DOCTYPE html>

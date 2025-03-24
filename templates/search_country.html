@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar País{% endblock %}
+
+{% block content %}
+    <h1>Buscar País</h1>
+    <p>Selecciona el país donde te gustaría vivir:</p>
+    <form method="POST">
+        <select name="country">
+            {% for country in countries %}
+                <option value="{{ country }}" {% if country == selected_country %}selected{% endif %}>{{ country }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Buscar">
+    </form>
+
+    {% if selected_country %}
+        <h2>Precios en {{ selected_country }}</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Precio (USD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item[0] }}</td>
+                    <td>${{ "%.2f"|format(item[1]) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
