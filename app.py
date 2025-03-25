@@ -13,8 +13,8 @@ def home():
 
 @app.route('/countries')
 def countries():
-    countries_data = get_cheapest_countries()
-    return render_template('countries.html', countries=countries_data)
+    
+    return render_template('countries.html')
 
 @app.route('/about')
 def about():
