@@ -1,53 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% block title %}Cost of Living Analysis{% endblock %}</title>
+    <title>{% block title %}MoveSmart - Intelligent Mobility Decisions{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-        .navbar {
-            background-color: #333;
-            overflow: hidden;
-        }
-        .navbar a {
-            float: left;
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-        }
-        .navbar a:hover {
-            background-color: #ddd;
-            color: black;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block head %}{% endblock %}
 </head>
 <body>
-    <div class="navbar">
-        <a href="/">Home</a>
-        <a href="/countries">Countries</a>
-        <a href="/search">Buscar País</a>
-        <a href="/about">About</a>
- 
-    </div>
+    <nav class="navbar">
+        <div class="logo">
+            <a href="/">MoveSmart</a>
+        </div>
+        <div class="nav-links">
+            <a href="/"><i class="fas fa-home"></i> Home</a>
+            <a href="/countries"><i class="fas fa-globe"></i> Countries</a>
+            <a href="/search"><i class="fas fa-search"></i> Search Country</a>
+            <a href="/search_job"><i class="fas fa-briefcase"></i> Search Job</a>
+            <a href="/about"><i class="fas fa-info-circle"></i> About</a>
+        </div>
+    </nav>
     
-    <div class="container">
+    {% if request.path == '/' %}
+    <div class="hero">
+        <div class="hero-content">
+            <h1>MoveSmart</h1>
+            <h2>Intelligent Mobility Decisions</h2>
+            <p>Make informed decisions about job mobility and financial planning with comprehensive data on salaries and cost of living worldwide.</p>
+            <div class="hero-buttons">
+                <a href="/search" class="btn primary">Find Countries</a>
+                <a href="/search_job" class="btn secondary">Explore Jobs</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+        
+    <div class="container {% if request.path == '/' %}with-hero{% endif %}">
         {% block content %}{% endblock %}
     </div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>MoveSmart</h3>
+                <p>Empowering global mobility decisions through data-driven insights.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/countries">Countries</a></li>
+                    <li><a href="/about">About</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p><i class="fas fa-envelope"></i> info@movesmart.example.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 MoveSmart. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>

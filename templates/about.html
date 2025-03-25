@@ -1,17 +1,210 @@
 {% extends "base.html" %}
 
-{% block title %}About This Project{% endblock %}
+{% block title %}About MoveSmart{% endblock %}
 
 {% block content %}
-    <h1>About This Project</h1>
-    <p>This application helps you analyze the cost of living across different countries based on the price of a typical basket of goods.</p>
+    <h1>About MoveSmart</h1>
+    <div class="about-section">
+        <p class="lead">MoveSmart is an innovative analytical tool designed to help individuals and companies make informed decisions about job mobility and financial planning. By integrating data on salaries, job offers, and cost of living across various cities and countries, MoveSmart empowers users to evaluate their career choices in a global context.</p>
+        
+        <h2>Key Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-chart-line"></i>
+                <h3>Comprehensive Cost Analysis</h3>
+                <p>Compare living costs, housing, transportation, food, and healthcare across different locations.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-money-bill-wave"></i>
+                <h3>Salary Comparisons</h3>
+                <p>Advanced salary comparisons by city and job sector.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-laptop-house"></i>
+                <h3>Digital Nomad Insights</h3>
+                <p>Identify optimal cities for digital nomads based on cost and quality of life.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-pie"></i>
+                <h3>Interactive Visualizations</h3>
+                <p>Intuitive interface with interactive graphs for easy data interpretation.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-file-excel"></i>
+                <h3>Excel Report Export</h3>
+                <p>Generate and export customized reports for further analysis.</p>
+            </div>
+        </div>
+        
+        <h2>How It Works</h2>
+        <p>MoveSmart consolidates data from reliable sources to create a powerful analytical model. Users can:</p>
+        <ol class="process-list">
+            <li>Input their job sector and current location</li>
+            <li>Explore potential cities and compare living costs</li>
+            <li>Evaluate salary expectations against local expenses</li>
+            <li>Make informed decisions about relocation or remote work opportunities</li>
+        </ol>
+        
+        <h2>Who Benefits</h2>
+        <div class="benefits-section">
+            <div class="benefit-item">
+                <h3>Professionals</h3>
+                <p>Evaluate job offers and living standards across different cities</p>
+            </div>
+            <div class="benefit-item">
+                <h3>Companies</h3>
+                <p>Set competitive salaries to attract global talent</p>
+            </div>
+            <div class="benefit-item">
+                <h3>Digital Nomads</h3>
+                <p>Find the best cities that balance cost and quality of life</p>
+            </div>
+            <div class="benefit-item">
+                <h3>Recruiters</h3>
+                <p>Understand salary trends and living costs for better talent acquisition</p>
+            </div>
+            <div class="benefit-item">
+                <h3>Market Analysts</h3>
+                <p>Gain insights into economic trends affecting workforce mobility</p>
+            </div>
+        </div>
+        
+        <h2>Project Scope</h2>
+        <p>MoveSmart focuses on providing static data analysis and does not include:</p>
+        <ul class="scope-list">
+            <li>Real-time data updates</li>
+            <li>Long-term predictive models</li>
+            <li>Company-specific salary policies</li>
+            <li>Manual data collection from non-public sources</li>
+        </ul>
+        
+        <p>Our goal is to offer a representative sample of jobs, cities, and goods to support informed decision-making in the evolving landscape of global work.</p>
+        
+        <div class="cta-section">
+            <h2>Get Started</h2>
+            <p>Explore MoveSmart today and take the first step towards making smarter mobility decisions in your career journey.</p>
+            <div class="cta-buttons">
+                <a href="/search" class="btn primary">Search Countries</a>
+                <a href="/search_job" class="btn primary">Find Jobs</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block head %}
+<style>
+    .lead {
+        font-size: 1.2rem;
+        line-height: 1.8;
+        margin-bottom: 2rem;
+    }
     
-    <h2>Data Source</h2>
-    <p>The data is sourced from our SQL database which contains comprehensive cost of living information for multiple countries.</p>
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
     
-    <h2>How It Works</h2>
-    <p>We analyze prices for various everyday items across different markets to determine the overall cost of living in each country.</p>
+    .feature-card {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+    }
     
-    <h2>Contact</h2>
-    <p>For more information, please contact us at: example@domain.com</p>
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .feature-card i {
+        font-size: 2.5rem;
+        color: #3498db;
+        margin-bottom: 1rem;
+    }
+    
+    .process-list {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin: 2rem 0;
+    }
+    
+    .process-list li {
+        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+    }
+    
+    .benefits-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .benefit-item {
+        flex: 1;
+        min-width: 200px;
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .benefit-item h3 {
+        color: #3498db;
+        margin-top: 0;
+    }
+    
+    .scope-list {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin: 2rem 0;
+    }
+    
+    .scope-list li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .cta-section {
+        background-color: #3498db;
+        color: white;
+        padding: 2.5rem;
+        border-radius: 10px;
+        text-align: center;
+        margin: 3rem 0 1rem;
+    }
+    
+    .cta-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .cta-section .btn {
+        background-color: white;
+        color: #3498db;
+    }
+    
+    .cta-section .btn:hover {
+        background-color: #f8f9fa;
+    }
+    
+    @media (max-width: 768px) {
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .benefits-section {
+            flex-direction: column;
+        }
+    }
+</style>
 {% endblock %}
