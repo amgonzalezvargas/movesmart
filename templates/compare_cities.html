@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Cities - MoveSmart{% endblock %}
+
+{% block content %}
+    <h1>Compare Cities Cost of Living</h1>
+    <div class="description">
+        <p>Compare the cost of living between any two cities in our database. Select cities from the dropdown menus below and click "Compare" to see a detailed comparison of item costs.</p>
+        <p>Items that are cheaper in one city will be highlighted in dark green, while more expensive items will be highlighted in red.</p>
+    </div>
+    
+    <form method="POST" class="compare-form">
+        <div class="city-selectors">
+            <div class="city-dropdown">
+                <select name="left_city" id="left_city" required>
+                    <option value="" disabled {% if not left_city %}selected{% endif %}>Select first city</option>
+                    {% for city in cities %}
+                        <option value="{{ city.city_name }}" {% if left_city == city.city_name %}selected{% endif %}>{{ city.city_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="city-dropdown">
+                <select name="right_city" id="right_city" required>
+                    <option value="" disabled {% if not right_city %}selected{% endif %}>Select second city</option>
+                    {% for city in cities %}
+                        <option value="{{ city.city_name }}" {% if right_city == city.city_name %}selected{% endif %}>{{ city.city_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="compare-btn-container">
+            <button type="submit" class="compare-btn">Compare</button>
+        </div>
+    </form>
+    
+    {% if comparison_results %}
+        <div class="comparison-results">
+            <div class="comparison-header">
+                <div class="city-column">{{ left_city }}</div>
+                <div class="item-column">Item</div>
+                <div class="city-column">{{ right_city }}</div>
+            </div>
+            
+            <div class="comparison-body">
+                {% for item in comparison_results %}
+                    <div class="comparison-row">
+                        <div class="city-column {{ item.left_class }}">
+                            {% if item.left_cost is not none %}
+                                ${{ "%.2f"|format(item.left_cost) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                        <div class="item-column {{ item.highlight_class }}">{{ item.item_name }}</div>
+                        <div class="city-column {{ item.right_class }}">
+                            {% if item.right_cost is not none %}
+                                ${{ "%.2f"|format(item.right_cost) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+        </div>
+        
+        <div class="comparison-legend">
+            <div class="legend-item">
+                <span class="color-box cheaper"></span> Cheaper
+            </div>
+            <div class="legend-item">
+                <span class="color-box expensive"></span> More Expensive
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block head %}
+<style>
+    .compare-form {
+        margin: 30px 0;
+    }
+    
+    .city-selectors {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+    }
+    
+    .city-dropdown {
+        flex: 1;
+    }
+    
+    .city-dropdown select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+    
+    .compare-btn-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+    }
+    
+    .compare-btn {
+        background-color: #3498db;
+        color: white;
+        padding: 12px 40px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .compare-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .comparison-results {
+        margin-top: 40px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .comparison-header {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        background-color: #3498db;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .comparison-header > div {
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .comparison-body {
+        background-color: white;
+    }
+    
+    .comparison-row {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .comparison-row:last-child {
+        border-bottom: none;
+    }
+    
+    .city-column, .item-column {
+        padding: 12px 15px;
+        text-align: center;
+    }
+    
+    .item-column {
+        background-color: #f9f9f9;
+        font-weight: 500;
+    }
+    
+    .cheaper {
+        background-color: #1e8449;
+        color: white;
+    }
+    
+    .expensive {
+        background-color: #c0392b;
+        color: white;
+    }
+    
+    .equal {
+        background-color: #f8f9fa;
+    }
+    
+    .comparison-legend {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 20px;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+    }
+    
+    .color-box {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        border-radius: 3px;
+    }
+    
+    .color-box.cheaper {
+        background-color: #1e8449;
+    }
+    
+    .color-box.expensive {
+        background-color: #c0392b;
+    }
+
+    .highlight-basket {
+        background-color: yellow !important;
+        color: red !important;
+        font-weight: bold;
+    }   
+    
+    @media (max-width: 768px) {
+        .city-selectors {
+            flex-direction: column;
+        }
+        
+        .comparison-row, .comparison-header {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        
+        .item-column {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
