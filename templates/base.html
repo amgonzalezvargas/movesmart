@@ -14,11 +14,9 @@
         </div>
         <div class="nav-links">
             <a href="/"><i class="fas fa-home"></i> Home</a>
-            <a href="/countries"><i class="fas fa-globe"></i> Countries</a>
-            <a href="/search"><i class="fas fa-search"></i> Search Country</a>
-            <a href="/search_job"><i class="fas fa-briefcase"></i> Search Job</a>
             <a href="/about"><i class="fas fa-info-circle"></i> About</a>
         </div>
+        
     </nav>
     
     {% if request.path == '/' %}
@@ -28,8 +26,7 @@
             <h2>Intelligent Mobility Decisions</h2>
             <p>Make informed decisions about job mobility and financial planning with comprehensive data on salaries and cost of living worldwide.</p>
             <div class="hero-buttons">
-                <a href="/search" class="btn primary">Find Countries</a>
-                <a href="/search_job" class="btn secondary">Explore Jobs</a>
+                <a href="/about" class="btn primary">Learn More</a>
             </div>
         </div>
     </div>
@@ -49,7 +46,6 @@
                 <h3>Quick Links</h3>
                 <ul>
                     <li><a href="/">Home</a></li>
-                    <li><a href="/countries">Countries</a></li>
                     <li><a href="/about">About</a></li>
                 </ul>
             </div>
