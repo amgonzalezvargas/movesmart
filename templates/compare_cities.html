@@ -15,7 +15,9 @@
                 <select name="left_city" id="left_city" required>
                     <option value="" disabled {% if not left_city %}selected{% endif %}>Select first city</option>
                     {% for city in cities %}
-                        <option value="{{ city.city_name }}" {% if left_city == city.city_name %}selected{% endif %}>{{ city.city_name }}</option>
+                        <option value="{{ city.country_name }} - {{ city.city_name }}" {% if left_city == city.country_name + ' - ' + city.city_name %}selected{% endif %}>
+                            {{ city.country_name }} - {{ city.city_name }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
@@ -24,7 +26,9 @@
                 <select name="right_city" id="right_city" required>
                     <option value="" disabled {% if not right_city %}selected{% endif %}>Select second city</option>
                     {% for city in cities %}
-                        <option value="{{ city.city_name }}" {% if right_city == city.city_name %}selected{% endif %}>{{ city.city_name }}</option>
+                        <option value="{{ city.country_name }} - {{ city.city_name }}" {% if right_city == city.country_name + ' - ' + city.city_name %}selected{% endif %}>
+                            {{ city.country_name }} - {{ city.city_name }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
@@ -38,10 +42,17 @@
     {% if comparison_results %}
         <div class="comparison-results">
             <div class="comparison-header">
-                <div class="city-column">{{ left_city }}</div>
+                <div class="city-column">
+                    {{ left_city_display.country }}<br>
+                    {{ left_city_display.city }}
+                </div>
                 <div class="item-column">Item</div>
-                <div class="city-column">{{ right_city }}</div>
+                <div class="city-column">
+                    {{ right_city_display.country }}<br>
+                    {{ right_city_display.city }}
+                </div>
             </div>
+            
             
             <div class="comparison-body">
                 {% for item in comparison_results %}
@@ -143,6 +154,15 @@
         padding: 15px;
         text-align: center;
     }
+    
+    .comparison-header .city-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.3;
+    }
+
     
     .comparison-body {
         background-color: white;

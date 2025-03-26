@@ -55,26 +55,39 @@ def create_html_content(img_data):
 
 
 def get_cities():
-    """Get all cities from the database."""
+    """Get all cities from the database, including country information."""
     cities = []
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
         
-        cursor.execute("SELECT city_name FROM city ORDER BY city_name")
+        # Updated query to join city and country tables
+        cursor.execute("""
+        SELECT c.city_name, co.country_name
+        FROM city c
+        JOIN country co ON c.country_id = co.country_id
+        ORDER BY co.country_name, c.city_name
+        """)
         cities = cursor.fetchall()
         
         cursor.close()
         conn.close()
     except Exception as e:
         print(f"Error fetching cities: {e}")
-    
     return cities
 
-def get_city_items(city_name):
-    """Get all items for a specific city."""
+
+def get_city_items(city_info):
+    """Get all items for a specific city.
+    city_info parameter can be just city_name or in "Country - City" format"""
     items = []
     try:
+        # Extract just the city name if in "Country - City" format
+        if " - " in city_info:
+            city_name = city_info.split(" - ")[1]
+        else:
+            city_name = city_info
+            
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
         
@@ -90,7 +103,7 @@ def get_city_items(city_name):
         cursor.close()
         conn.close()
     except Exception as e:
-        print(f"Error fetching items for city {city_name}: {e}")
+        print(f"Error fetching items for city {city_info}: {e}")
     
     return items
 

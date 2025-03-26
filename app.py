@@ -22,12 +22,23 @@ def compare_cities():
     # Initialize variables
     left_city = None
     right_city = None
+    left_city_display = {"country": "", "city": ""}
+    right_city_display = {"country": "", "city": ""}
     comparison_results = []
     
     # Handle form submission
     if request.method == 'POST':
         left_city = request.form.get('left_city')
         right_city = request.form.get('right_city')
+        
+        # Extract country and city for display
+        if left_city and " - " in left_city:
+            country, city = left_city.split(" - ")
+            left_city_display = {"country": country, "city": city}
+        
+        if right_city and " - " in right_city:
+            country, city = right_city.split(" - ")
+            right_city_display = {"country": country, "city": city}
         
         if left_city and right_city:
             # Get items for each city
@@ -40,7 +51,9 @@ def compare_cities():
     return render_template('compare_cities.html', 
                            cities=cities, 
                            left_city=left_city, 
-                           right_city=right_city, 
+                           right_city=right_city,
+                           left_city_display=left_city_display,
+                           right_city_display=right_city_display,
                            comparison_results=comparison_results)
 
 
