@@ -1,8 +1,7 @@
 # app.py
 from flask import Flask, render_template, request
 import os
-from utils import get_cities, get_city_items, compare_city_items, get_countries, create_salaries_chart, get_job_areas
-from utils import get_cities, get_city_items, compare_city_items, get_countries, create_salaries_chart, get_job_areas, search_jobs_by_country
+from utils import get_cities, get_city_items, compare_city_items, get_countries, create_salaries_chart, get_job_areas, search_jobs_by_country, create_affordability_heatmap
 
 
 
@@ -132,6 +131,34 @@ def jobs_by_country():
                           sort_by=sort_by,
                           sort_dir=sort_dir)
 
+
+
+@app.route('/affordability_by_country', methods=['GET', 'POST'])
+def affordability_by_country():
+    # Get all countries for the dropdown
+    countries = get_countries()
+    
+    # Initialize variables
+    selected_country = None
+    img_data = None
+    no_results = False
+    
+    # Handle form submission
+    if request.method == 'POST':
+        selected_country = request.form.get('country')
+        
+        if selected_country:
+            # Generate the heatmap
+            img_data = create_affordability_heatmap(selected_country)
+            
+            if img_data is None:
+                no_results = True
+    
+    return render_template('affordability_by_country.html', 
+                           countries=countries, 
+                           selected_country=selected_country, 
+                           img_data=img_data,
+                           no_results=no_results)
 
 
 
