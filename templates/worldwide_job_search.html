@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Worldwide Job Search - MoveSmart{% endblock %}
+
+{% block content %}
+    <h1>Worldwide Job Search</h1>
+    <div class="description">
+        <p>Search for job opportunities worldwide by entering keywords related to your desired position. 
+           This tool will find jobs containing your keywords in the job title and show you how affordable each city is 
+           where these jobs are located.</p>
+    </div>
+    
+    <form method="POST" class="search-form">
+        <div class="keyword-search">
+            <input type="text" name="keywords" id="keywords" placeholder="Enter job keywords (e.g., developer, manager)" 
+                   value="{{ keywords if keywords else '' }}" required>
+        </div>
+        
+        <div class="search-btn-container">
+            <button type="submit" class="search-btn">Worldwide Job Search</button>
+        </div>
+    </form>
+    
+    {% if results %}
+        <div class="results-container">
+            <h2>Search Results for "{{ keywords }}"</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>Area</th>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Type of Contract</th>
+                        <th>Salary</th>
+                        {% for i in range(5) %}
+                            <th>City Affordability</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in results %}
+                        <tr>
+                            <td>{{ job.country_name }}</td>
+                            <td>{{ job.area_name }}</td>
+                            <td>{{ job.job_title }}</td>
+                            <td>{{ job.company_name }}</td>
+                            <td>{{ job.contract_type }}</td>
+                            <td>${{ "{:,.2f}".format(job.month_mean_salary) }}</td>
+                            
+                            {% for city in job.cities[:5] %}
+                                {% if job.month_mean_salary > city.unit_cost_usd %}
+                                    <td class="affordable">{{ city.city_name }}: ${{ "{:,.2f}".format(city.unit_cost_usd) }}</td>
+                                {% else %}
+                                    <td class="expensive">{{ city.city_name }}: ${{ "{:,.2f}".format(city.unit_cost_usd) }}</td>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {# Add empty cells if there are fewer than 5 cities #}
+                            {% for i in range(5 - job.cities|length) %}
+                                <td>-</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif searched and not results %}
+        <div class="no-results">
+            <h2>No Results Found</h2>
+            <p>No jobs match your search keywords. Try using different keywords or more general terms.</p>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block head %}
+<style>
+    .search-form {
+        margin: 30px 0;
+    }
+    
+    .keyword-search {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .keyword-search input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+    
+    .search-btn-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+    }
+    
+    .search-btn {
+        background-color: #3498db;
+        color: white;
+        padding: 12px 40px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .search-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .results-container {
+        margin-top: 40px;
+        overflow-x: auto;
+    }
+    
+    .data-table {
+        min-width: 100%;
+    }
+    
+    .affordable {
+        background-color: #27ae60;
+        color: white;
+    }
+    
+    .expensive {
+        background-color: #e74c3c;
+        color: white;
+    }
+    
+    .no-results {
+        margin-top: 40px;
+        padding: 30px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .no-results h2 {
+        color: #e74c3c;
+    }
+</style>
+{% endblock %}

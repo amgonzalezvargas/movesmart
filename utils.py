@@ -8,6 +8,9 @@ from db_config import DB_CONFIG
 import mysql
 import mysql.connector  # This imports the specific connector module
 import numpy as np
+import re
+
+
 
 def create_html_content(img_data):
     return f'''
@@ -583,3 +586,147 @@ def create_affordability_heatmap(country_name):
     img_data = base64.b64encode(buf.getvalue()).decode('utf8')
     
     return img_data
+
+
+
+def search_jobs_by_keywords(keywords):
+    """Search for jobs containing one or more keywords in the job title."""
+    jobs_with_cities = []
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        # Split keywords by spaces or commas
+        keywords_list = [k.strip() for k in re.split(r'[,\s]+', keywords) if k.strip()]
+        
+        if not keywords_list:
+            return []
+        
+        # Build the SQL condition for keywords
+        keyword_conditions = []
+        params = []
+        
+        for keyword in keywords_list:
+            keyword_conditions.append("j.job_title LIKE %s")
+            params.append(f"%{keyword}%")
+        
+        keyword_sql = " OR ".join(keyword_conditions)
+        
+        # Main query to get jobs matching keywords
+        query = f"""
+        SELECT 
+            co.country_id,
+            co.country_name,
+            ja.area_name,
+            j.job_title,
+            c.company_name,
+            j.contract_type,
+            j.month_mean_salary
+        FROM job j
+        JOIN country co ON j.country_id = co.country_id
+        JOIN job_area ja ON j.area_id = ja.area_id
+        JOIN company c ON j.company_id = c.company_id
+        WHERE {keyword_sql}
+        ORDER BY co.country_name, ja.area_name
+        """
+        
+        cursor.execute(query, params)
+        jobs = cursor.fetchall()
+        
+        # For each job, get cities in the job's country and their Monthly Basket of Goods cost
+        for job in jobs:
+            country_id = job['country_id']
+            
+            # Query to get cities and their Monthly Basket of Goods cost for this country
+            city_query = """
+            SELECT 
+                ci.city_name,
+                i.unit_cost_usd
+            FROM city ci
+            JOIN item i ON ci.city_id = i.city_id
+            WHERE ci.country_id = %s AND i.item_name = 'Monthly Basket of Goods'
+            ORDER BY ci.city_name
+            """
+            
+            cursor.execute(city_query, (country_id,))
+            cities = cursor.fetchall()
+            
+            # Add cities to the job entry
+            job_entry = job.copy()
+            job_entry['cities'] = cities
+            
+            # Add the job entry to the results
+            jobs_with_cities.append(job_entry)
+        
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error searching jobs by keywords: {e}")
+    
+    return jobs_with_cities
+
+
+
+def get_city_items_for_basket(city_info):
+    """Get all items for a specific city, excluding Monthly Basket of Goods."""
+    items = []
+    try:
+        # Extract just the city name if in "Country - City" format
+        if " - " in city_info:
+            city_name = city_info.split(" - ")[1]
+        else:
+            city_name = city_info
+            
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+        SELECT i.item_id, i.item_name, i.unit_cost_usd
+        FROM item i
+        JOIN city c ON i.city_id = c.city_id
+        WHERE c.city_name = %s
+        AND i.item_name != 'Monthly Basket of Goods'
+        ORDER BY i.item_name
+        """
+        cursor.execute(query, (city_name,))
+        items = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error fetching items for city {city_info}: {e}")
+    
+    return items
+
+def get_reference_basket_cost(city_info):
+    """Get the cost of the reference Monthly Basket of Goods for a city."""
+    try:
+        # Extract just the city name if in "Country - City" format
+        if " - " in city_info:
+            city_name = city_info.split(" - ")[1]
+        else:
+            city_name = city_info
+            
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+        SELECT i.unit_cost_usd
+        FROM item i
+        JOIN city c ON i.city_id = c.city_id
+        WHERE c.city_name = %s
+        AND i.item_name = 'Monthly Basket of Goods'
+        """
+        cursor.execute(query, (city_name,))
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if result:
+            return result['unit_cost_usd']
+        else:
+            return None
+    except Exception as e:
+        print(f"Error fetching reference basket cost for city {city_info}: {e}")
+        return None

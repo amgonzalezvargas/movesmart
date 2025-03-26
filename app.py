@@ -1,7 +1,11 @@
 # app.py
 from flask import Flask, render_template, request
 import os
+import re
 from utils import get_cities, get_city_items, compare_city_items, get_countries, create_salaries_chart, get_job_areas, search_jobs_by_country, create_affordability_heatmap
+from utils import search_jobs_by_keywords, get_city_items_for_basket, get_reference_basket_cost
+from utils import get_countries, create_salaries_chart, get_job_areas, search_jobs_by_country, create_affordability_heatmap
+from utils import search_jobs_by_keywords
 
 
 
@@ -159,6 +163,68 @@ def affordability_by_country():
                            selected_country=selected_country, 
                            img_data=img_data,
                            no_results=no_results)
+
+@app.route('/worldwide_job_search', methods=['GET', 'POST'])
+def worldwide_job_search():
+    # Initialize variables
+    results = []
+    searched = False
+    keywords = None
+    
+    # Handle form submission
+    if request.method == 'POST':
+        searched = True
+        keywords = request.form.get('keywords')
+        
+        if keywords:
+            # Search for jobs matching the keywords
+            results = search_jobs_by_keywords(keywords)
+    
+    return render_template('worldwide_job_search.html', 
+                           results=results,
+                           searched=searched,
+                           keywords=keywords)
+
+
+@app.route('/custom_basket', methods=['GET', 'POST'])
+def custom_basket():
+    # Get all cities for the dropdown
+    cities = get_cities()
+    
+    # Initialize variables
+    selected_city = None
+    items = None
+    reference_basket = None
+    custom_basket = None
+    
+    # Handle form submission
+    if request.method == 'POST':
+        selected_city = request.form.get('city')
+        
+        if selected_city:
+            # Get items for the selected city
+            items = get_city_items_for_basket(selected_city)
+            
+            # Get reference basket cost
+            reference_basket = get_reference_basket_cost(selected_city)
+            
+            # Check if this is a calculation request
+            if request.form.get('calculate'):
+                # Calculate custom basket cost
+                custom_basket = 0
+                
+                for item in items:
+                    quantity = request.form.get(f'quantity_{item["item_id"]}')
+                    if quantity and float(quantity) > 0:
+                        item['quantity'] = float(quantity)
+                        custom_basket += item['unit_cost_usd'] * item['quantity']
+    
+    return render_template('custom_basket.html', 
+                           cities=cities, 
+                           selected_city=selected_city, 
+                           items=items,
+                           reference_basket=reference_basket,
+                           custom_basket=custom_basket)
 
 
 

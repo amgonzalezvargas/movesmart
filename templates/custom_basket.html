@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Custom Basket - MoveSmart{% endblock %}
+
+{% block content %}
+    <h1>Custom Basket of Goods</h1>
+    <div class="description">
+        <p>Create your own personalized basket of goods by selecting items and specifying monthly quantities. This tool helps you understand how your specific consumption habits affect your cost of living in different cities, and how your customized expenses compare to the standard Monthly Basket of Goods.</p>
+    </div>
+    
+    <form method="POST" class="custom-basket-form" id="basketForm">
+        <div class="city-selector">
+            <select name="city" id="city" required onchange="this.form.submit()">
+                <option value="" disabled {% if not selected_city %}selected{% endif %}>Select a city</option>
+                {% for city in cities %}
+                    <option value="{{ city.country_name }} - {{ city.city_name }}" {% if selected_city == city.country_name + ' - ' + city.city_name %}selected{% endif %}>
+                        {{ city.country_name }} - {{ city.city_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        {% if items %}
+            <div class="items-table-container">
+                <table class="data-table items-table">
+                    <thead>
+                        <tr>
+                            <th>Consumer goods</th>
+                            <th>Unitary price in USD</th>
+                            <th>Units per month</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            <tr>
+                                <td>{{ item.item_name }}</td>
+                                <td>${{ "%.2f"|format(item.unit_cost_usd) }}</td>
+                                <td>
+                                    <input type="number" name="quantity_{{ item.item_id }}" id="quantity_{{ item.item_id }}" 
+                                           min="0" step="0.01" value="{{ item.quantity if item.quantity is defined else 0 }}" 
+                                           class="quantity-input">
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="calculate-btn-container">
+                <button type="submit" name="calculate" value="true" class="calculate-btn">Calculate Custom Basket of Goods</button>
+            </div>
+            
+            {% if reference_basket is not none and custom_basket is not none %}
+                <div class="results-container">
+                    <div class="basket-result reference">
+                        <h3>Reference Monthly Basket of Goods</h3>
+                        <p class="basket-cost">${{ "%.2f"|format(reference_basket) }}</p>
+                    </div>
+                    
+                    <div class="basket-result custom {% if custom_basket > reference_basket %}expensive{% else %}affordable{% endif %}">
+                        <h3>Your Custom Monthly Basket of Goods</h3>
+                        <p class="basket-cost">${{ "%.2f"|format(custom_basket) }}</p>
+                        
+                        {% if custom_basket > reference_basket %}
+                            <p class="comparison">Your custom basket is ${{ "%.2f"|format(custom_basket - reference_basket) }} more expensive than the reference basket.</p>
+                        {% else %}
+                            <p class="comparison">Your custom basket is ${{ "%.2f"|format(reference_basket - custom_basket) }} cheaper than the reference basket.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </form>
+{% endblock %}
+
+{% block head %}
+<style>
+    .custom-basket-form {
+        margin: 30px 0;
+    }
+    
+    .city-selector {
+        max-width: 400px;
+        margin: 0 auto 30px;
+    }
+    
+    .city-selector select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+    
+    .items-table-container {
+        margin: 30px 0;
+        overflow-x: auto;
+    }
+    
+    .items-table {
+        width: 100%;
+    }
+    
+    .quantity-input {
+        width: 100px;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        text-align: right;
+    }
+    
+    .calculate-btn-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+    }
+    
+    .calculate-btn {
+        background-color: #3498db;
+        color: white;
+        padding: 12px 40px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .calculate-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .results-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        margin-top: 40px;
+        justify-content: center;
+    }
+    
+    .basket-result {
+        flex: 1;
+        min-width: 250px;
+        max-width: 400px;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+    
+    .basket-result h3 {
+        margin-top: 0;
+        color: #2c3e50;
+    }
+    
+    .basket-cost {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 15px 0;
+    }
+    
+    .reference {
+        background-color: #f8f9fa;
+    }
+    
+    .affordable {
+        background-color: #d5f5e3;
+    }
+    
+    .expensive {
+        background-color: #fadbd8;
+    }
+    
+    .comparison {
+        font-size: 16px;
+        font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .results-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .basket-result {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
