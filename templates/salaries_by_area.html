@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Salaries by Area - MoveSmart{% endblock %}
+
+{% block content %}
+    <h1>Salaries by Area Analysis</h1>
+    <div class="description">
+        <p>Compare average salaries across different job areas within a selected country. This analysis helps you understand which sectors offer better compensation in various locations.</p>
+    </div>
+    
+    <form method="POST" class="salaries-form">
+        <div class="country-selector">
+            <select name="country" id="country" required>
+                <option value="" disabled {% if not selected_country %}selected{% endif %}>Select a country</option>
+                {% for country in countries %}
+                    <option value="{{ country.country_name }}" {% if selected_country == country.country_name %}selected{% endif %}>
+                        {{ country.country_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="compare-btn-container">
+            <button type="submit" class="compare-btn">Compare Job Areas</button>
+        </div>
+    </form>
+    
+    {% if img_data %}
+        <div class="chart-container">
+            <img src="data:image/png;base64,{{ img_data }}" alt="Salaries by Area Chart">
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block head %}
+<style>
+    .salaries-form {
+        margin: 30px 0;
+    }
+    
+    .country-selector {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .country-selector select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+    
+    .compare-btn-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+    }
+    
+    .compare-btn {
+        background-color: #3498db;
+        color: white;
+        padding: 12px 40px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .compare-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .chart-container {
+        margin: 40px auto;
+        width: 90%;
+        text-align: center;
+    }
+    
+    .chart-container img {
+        max-width: 100%;
+        height: auto;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}

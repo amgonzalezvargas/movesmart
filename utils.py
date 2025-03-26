@@ -7,6 +7,7 @@ from io import BytesIO
 from db_config import DB_CONFIG
 import mysql
 import mysql.connector  # This imports the specific connector module
+import numpy as np
 
 def create_html_content(img_data):
     return f'''
@@ -175,3 +176,90 @@ def compare_city_items(left_items, right_items):
     
     return comparison_results
 
+
+def get_countries():
+    """Get all countries from the database."""
+    countries = []
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT country_name FROM country ORDER BY country_name")
+        countries = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error fetching countries: {e}")
+    return countries
+
+def get_mean_salaries_by_area(country_name):
+    """Get mean salaries grouped by job area for a specific country."""
+    mean_salaries = []
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT ja.area_id, ja.area_name, AVG(j.month_mean_salary) AS mean_salary 
+            FROM job j 
+            JOIN job_area ja ON j.area_id = ja.area_id 
+            JOIN country c ON j.country_id = c.country_id 
+            WHERE c.country_name = %s 
+            GROUP BY ja.area_id, ja.area_name 
+            ORDER BY mean_salary DESC
+        """, (country_name,))
+        mean_salaries = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error fetching mean salaries for {country_name}: {e}")
+    return mean_salaries
+
+def create_salaries_chart(country_name):
+    """Create a bar chart showing mean salaries by job area."""
+    # Get the data
+    
+    mean_salaries = get_mean_salaries_by_area(country_name)
+    
+    if not mean_salaries:
+        return None
+    
+    # Extract data for plotting
+    areas = [item['area_name'] for item in mean_salaries]
+    salaries = [item['mean_salary'] for item in mean_salaries]
+    
+    # Create the plot
+    fig = Figure(figsize=(12, 6))
+    ax = fig.add_subplot(1, 1, 1)
+    
+    # Generate a colormap with different colors for each bar
+    import matplotlib.cm as cm
+    colors = cm.viridis(np.linspace(0, 1, len(areas)))
+    
+    # Create the bar chart
+    bars = ax.bar(range(len(areas)), salaries, color=colors)
+    
+    # Set labels and title
+    ax.set_xlabel('Job Areas')
+    ax.set_ylabel('Mean Salary (USD)')
+    ax.set_title(f'Mean Salary by Job Area in {country_name}')
+    
+    # Set x-ticks
+    ax.set_xticks(range(len(areas)))
+    ax.set_xticklabels(areas, rotation=45, ha='right')
+    
+    # Add currency formatting to y-axis
+    from matplotlib.ticker import FuncFormatter
+    def currency_formatter(x, pos):
+        return f'${x:,.2f}'
+    
+    ax.yaxis.set_major_formatter(FuncFormatter(currency_formatter))
+    
+    # Adjust layout to make room for rotated labels
+    fig.tight_layout()
+    
+    # Save to a BytesIO object
+    buf = BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+    img_data = base64.b64encode(buf.getvalue()).decode('utf8')
+    
+    return img_data

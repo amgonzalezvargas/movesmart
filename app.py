@@ -1,7 +1,8 @@
 # app.py
 from flask import Flask, render_template, request
-from utils import get_cities, get_city_items, compare_city_items
 import os
+from utils import get_cities, get_city_items, compare_city_items, get_countries, create_salaries_chart
+
 
 
 app = Flask(__name__)
@@ -55,6 +56,29 @@ def compare_cities():
                            left_city_display=left_city_display,
                            right_city_display=right_city_display,
                            comparison_results=comparison_results)
+
+@app.route('/salaries_by_area', methods=['GET', 'POST'])
+def salaries_by_area():
+    # Get all countries for the dropdown
+    countries = get_countries()
+    
+    # Initialize variables
+    selected_country = None
+    img_data = None
+    
+    # Handle form submission
+    if request.method == 'POST':
+        selected_country = request.form.get('country')
+        
+        if selected_country:
+            # Generate the chart
+            img_data = create_salaries_chart(selected_country)
+    
+    return render_template('salaries_by_area.html', 
+                           countries=countries, 
+                           selected_country=selected_country, 
+                           img_data=img_data)
+
 
 
 if __name__ == '__main__':
