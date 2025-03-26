@@ -1,7 +1,8 @@
 # app.py
 from flask import Flask, render_template, request
 import os
-from utils import get_cities, get_city_items, compare_city_items, get_countries, create_salaries_chart
+from utils import get_cities, get_city_items, compare_city_items, get_countries, create_salaries_chart, get_job_areas
+from utils import get_cities, get_city_items, compare_city_items, get_countries, create_salaries_chart, get_job_areas, search_jobs_by_country
 
 
 
@@ -78,6 +79,59 @@ def salaries_by_area():
                            countries=countries, 
                            selected_country=selected_country, 
                            img_data=img_data)
+
+
+
+@app.route('/jobs_by_country', methods=['GET', 'POST'])
+def jobs_by_country():
+    # Get data for dropdowns
+    countries = get_countries()
+    job_areas = get_job_areas()
+    salary_ranges = list(range(0, 21000, 1000))  # 0 to 20000 in increments of 1000
+    
+    # Initialize variables
+    selected_country = None
+    selected_area = None
+    selected_salary = None
+    results = []
+    searched = False
+    
+    # Get sorting parameters
+    sort_by = request.args.get('sort_by', 'month_mean_salary')
+    sort_dir = request.args.get('sort_dir', 'DESC')
+    
+    # Handle form submission
+    if request.method == 'POST':
+        searched = True
+        selected_country = request.form.get('country')
+        selected_area = request.form.get('job_area')
+        selected_salary = request.form.get('min_salary')
+        
+        if selected_country and selected_area and selected_salary:
+            results = search_jobs_by_country(selected_country, selected_area, selected_salary, sort_by, sort_dir)
+    
+    # If using GET for sorting but we have form data in session
+    elif request.args.get('sort_by') and request.args.get('country'):
+        searched = True
+        selected_country = request.args.get('country')
+        selected_area = request.args.get('area')
+        selected_salary = request.args.get('salary')
+        
+        if selected_country and selected_area and selected_salary:
+            results = search_jobs_by_country(selected_country, selected_area, selected_salary, sort_by, sort_dir)
+    
+    return render_template('jobs_by_country.html',
+                          countries=countries,
+                          job_areas=job_areas,
+                          salary_ranges=salary_ranges,
+                          selected_country=selected_country,
+                          selected_area=selected_area,
+                          selected_salary=selected_salary,
+                          results=results,
+                          searched=searched,
+                          sort_by=sort_by,
+                          sort_dir=sort_dir)
+
 
 
 

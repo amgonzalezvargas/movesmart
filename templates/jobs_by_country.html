@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Jobs by Country - MoveSmart{% endblock %}
+
+{% block content %}
+    <h1>Jobs by Country</h1>
+    <div class="description">
+        <p>Explore job opportunities across different countries based on your preferred job area and salary requirements. This tool helps you discover suitable positions in global markets to support your career mobility decisions.</p>
+    </div>
+    
+    <form method="POST" class="jobs-form">
+        <div class="filters-container">
+            <div class="filter-item">
+                <label for="country">Country</label>
+                <select name="country" id="country" required>
+                    <option value="" disabled {% if not selected_country %}selected{% endif %}>Select a country</option>
+                    {% for country in countries %}
+                        <option value="{{ country.country_name }}" {% if selected_country == country.country_name %}selected{% endif %}>
+                            {{ country.country_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-item">
+                <label for="job_area">Job Area</label>
+                <select name="job_area" id="job_area" required>
+                    <option value="" disabled {% if not selected_area %}selected{% endif %}>Select a job area</option>
+                    {% for area in job_areas %}
+                        <option value="{{ area.area_name }}" {% if selected_area == area.area_name %}selected{% endif %}>
+                            {{ area.area_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-item">
+                <label for="min_salary">Minimum Salary (USD)</label>
+                <select name="min_salary" id="min_salary" required>
+                    <option value="" disabled {% if not selected_salary %}selected{% endif %}>Select minimum salary</option>
+                    {% for salary in salary_ranges %}
+                        <option value="{{ salary }}" {% if selected_salary == salary|string %}selected{% endif %}>
+                            ${{ "{:,}".format(salary) }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="search-btn-container">
+            <button type="submit" class="search-btn">Search Jobs</button>
+        </div>
+    </form>
+    
+    {% if results %}
+        <div class="results-container">
+            <h2>Search Results</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <a href="{{ url_for('jobs_by_country', sort_by='country_name', sort_dir='ASC' if sort_by == 'country_name' and sort_dir == 'DESC' else 'DESC', country=selected_country, area=selected_area, salary=selected_salary) }}">
+                                Country
+                                {% if sort_by == 'country_name' %}
+                                    <i class="fas fa-sort-{{ 'up' if sort_dir == 'ASC' else 'down' }}"></i>
+                                {% else %}
+                                    <i class="fas fa-sort"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ url_for('jobs_by_country', sort_by='area_name', sort_dir='ASC' if sort_by == 'area_name' and sort_dir == 'DESC' else 'DESC', country=selected_country, area=selected_area, salary=selected_salary) }}">
+                                Area
+                                {% if sort_by == 'area_name' %}
+                                    <i class="fas fa-sort-{{ 'up' if sort_dir == 'ASC' else 'down' }}"></i>
+                                {% else %}
+                                    <i class="fas fa-sort"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ url_for('jobs_by_country', sort_by='job_title', sort_dir='ASC' if sort_by == 'job_title' and sort_dir == 'DESC' else 'DESC', country=selected_country, area=selected_area, salary=selected_salary) }}">
+                                Job Title
+                                {% if sort_by == 'job_title' %}
+                                    <i class="fas fa-sort-{{ 'up' if sort_dir == 'ASC' else 'down' }}"></i>
+                                {% else %}
+                                    <i class="fas fa-sort"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ url_for('jobs_by_country', sort_by='company_name', sort_dir='ASC' if sort_by == 'company_name' and sort_dir == 'DESC' else 'DESC', country=selected_country, area=selected_area, salary=selected_salary) }}">
+                                Company
+                                {% if sort_by == 'company_name' %}
+                                    <i class="fas fa-sort-{{ 'up' if sort_dir == 'ASC' else 'down' }}"></i>
+                                {% else %}
+                                    <i class="fas fa-sort"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ url_for('jobs_by_country', sort_by='contract_type', sort_dir='ASC' if sort_by == 'contract_type' and sort_dir == 'DESC' else 'DESC', country=selected_country, area=selected_area, salary=selected_salary) }}">
+                                Type of Contract
+                                {% if sort_by == 'contract_type' %}
+                                    <i class="fas fa-sort-{{ 'up' if sort_dir == 'ASC' else 'down' }}"></i>
+                                {% else %}
+                                    <i class="fas fa-sort"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ url_for('jobs_by_country', sort_by='month_mean_salary', sort_dir='ASC' if sort_by == 'month_mean_salary' and sort_dir == 'DESC' else 'DESC', country=selected_country, area=selected_area, salary=selected_salary) }}">
+                                Salary
+                                {% if sort_by == 'month_mean_salary' %}
+                                    <i class="fas fa-sort-{{ 'up' if sort_dir == 'ASC' else 'down' }}"></i>
+                                {% else %}
+                                    <i class="fas fa-sort"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in results %}
+                        <tr>
+                            <td>{{ job.country_name }}</td>
+                            <td>{{ job.area_name }}</td>
+                            <td>{{ job.job_title }}</td>
+                            <td>{{ job.company_name }}</td>
+                            <td>{{ job.contract_type }}</td>
+                            <td>${{ "{:,.2f}".format(job.month_mean_salary) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif searched and not results %}
+        <div class="no-results">
+            <h2>No Results Found</h2>
+            <p>No jobs match your search criteria. Try adjusting your filters to see more results.</p>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block head %}
+<style>
+    .jobs-form {
+        margin: 30px 0;
+    }
+    
+    .filters-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .filter-item label {
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    
+    .filter-item select {
+        padding: 12px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+    
+    .search-btn-container {
+        display: flex;
+        justify-content: center;
+        margin: 30px 0;
+    }
+    
+    .search-btn {
+        background-color: #3498db;
+        color: white;
+        padding: 12px 40px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .search-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .results-container {
+        margin-top: 40px;
+    }
+    
+    .no-results {
+        margin-top: 40px;
+        padding: 30px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .no-results h2 {
+        color: #e74c3c;
+    }
+    
+    .data-table th a {
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .data-table th a:hover {
+        text-decoration: underline;
+    }
+    
+    .data-table th i {
+        margin-left: 5px;
+    }
+</style>
+{% endblock %}

@@ -263,3 +263,115 @@ def create_salaries_chart(country_name):
     img_data = base64.b64encode(buf.getvalue()).decode('utf8')
     
     return img_data
+
+
+def get_cities_with_countries():
+    """Get all cities with their corresponding countries."""
+    cities = []
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT c.city_name, co.country_name 
+            FROM city c
+            JOIN country co ON c.country_id = co.country_id
+            ORDER BY co.country_name, c.city_name
+        """)
+        cities = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error fetching cities with countries: {e}")
+    return cities
+
+def get_job_areas():
+    """Get all job areas from the database."""
+    areas = []
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT area_name FROM job_area ORDER BY area_name")
+        areas = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error fetching job areas: {e}")
+    return areas
+
+def search_jobs_by_criteria(country_name, city_name, area_name, min_salary, sort_by='month_mean_salary', sort_dir='DESC'):
+    """Search for jobs based on country, city, job area, and minimum salary."""
+    jobs = []
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        # Build the ORDER BY clause based on sort parameters
+        order_clause = f"{sort_by} {sort_dir}"
+        
+        query = """
+        SELECT 
+            co.country_name,
+            ci.city_name,
+            ja.area_name,
+            j.job_title,
+            c.company_name,
+            j.contract_type,
+            j.month_mean_salary
+        FROM job j
+        JOIN country co ON j.country_id = co.country_id
+        JOIN job_area ja ON j.area_id = ja.area_id
+        JOIN company c ON j.company_id = c.company_id
+        JOIN city ci ON ci.country_id = co.country_id
+        WHERE co.country_name = %s
+        AND ci.city_name = %s
+        AND ja.area_name = %s
+        AND j.month_mean_salary >= %s
+        ORDER BY """ + order_clause
+        
+        cursor.execute(query, (country_name, city_name, area_name, min_salary))
+        jobs = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error searching jobs: {e}")
+    
+    return jobs
+
+
+def search_jobs_by_country(country_name, area_name, min_salary, sort_by='month_mean_salary', sort_dir='DESC'):
+    """Search for jobs based on country, job area, and minimum salary."""
+    jobs = []
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        # Build the ORDER BY clause based on sort parameters
+        order_clause = f"{sort_by} {sort_dir}"
+        
+        query = """
+        SELECT 
+            co.country_name,
+            ja.area_name,
+            j.job_title,
+            c.company_name,
+            j.contract_type,
+            j.month_mean_salary
+        FROM job j
+        JOIN country co ON j.country_id = co.country_id
+        JOIN job_area ja ON j.area_id = ja.area_id
+        JOIN company c ON j.company_id = c.company_id
+        WHERE co.country_name = %s
+        AND ja.area_name = %s
+        AND j.month_mean_salary >= %s
+        ORDER BY """ + order_clause
+        
+        cursor.execute(query, (country_name, area_name, min_salary))
+        jobs = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error searching jobs: {e}")
+    
+    return jobs
